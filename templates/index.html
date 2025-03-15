@@ -116,7 +116,7 @@
 
         <button onclick="playAudio('myAudio9')" class="sound-button">
             <img src="https://cdn.pixabay.com/photo/2020/03/11/04/37/emoji-4920963_1280.jpg" alt="Sound Button">
-            <p class="button-label">SCARY</p>
+            <p class="button-label">FART</p>
         </button>
 
         <button onclick="playAudio('myAudio10')" class="sound-button">
@@ -139,18 +139,23 @@
     <button onclick="startRecording()" class="record-button">🔴 Start Recording</button>
     <button onclick="stopRecording()" class="record-button" style="background-color: green;">🛑 Stop & Download</button>
 
-    <audio id="myAudio1" src="https://jmp.sh/BQlAhSun"></audio>
-    <audio id="myAudio2" src="https://jmp.sh/1RksIkEK"></audio>
-    <audio id="myAudio3" src="https://jmp.sh/s30ALPKi"></audio>
-    <audio id="myAudio4" src="https://jmp.sh/U4I5nxcm"></audio>
-    <audio id="myAudio5" src="https://jmp.sh/X2Fc80Ft"></audio>
-    <audio id="myAudio6" src="https://jmp.sh/iyLYSg3o"></audio>
-    <audio id="myAudio7" src="https://jmp.sh/RfBcsSs0"></audio>
-    <audio id="myAudio8" src="https://jmp.sh/2vtbhLCo"></audio>
-    <audio id="myAudio9" src="https://jmp.sh/1RksIkEK"></audio>
-    <audio id="myAudio10" src="https://jmp.sh/iQ724dHi"></audio>
-    <audio id="myAudio11" src="https://jmp.sh/Xf8tVfZ5"></audio>
-    <audio id="myAudio12" src="https://jmp.sh/4dWeAaIs"></audio>
+    <audio id="myAudio1" src="{{ url_for( 'static' , filename='getout.mp3') }}" preload="auto"></audio>
+    <audio id="myAudio2" src="{{ url_for( 'static' , filename='Brain_fart.mp3') }}" preload="auto"></audio>
+    <audio id="myAudio3" src="{{ url_for( 'static' , filename='alarm.mp3') }}" preload="auto"></audio>
+    <audio id="myAudio4" src="{{ url_for( 'static' , filename='Boy_wth.mp3') }}" preload="auto"></audio>
+    <audio id="myAudio5" src="{{ url_for( 'static' , filename='bell.mp3') }}" preload="auto"></audio>
+    <audio id="myAudio6" src="{{ url_for( 'static' , filename='omg.mp3') }}" preload="auto"></audio>
+    <audio id="myAudio7" src="{{ url_for( 'static' , filename='boom.mp3') }}" preload="auto"></audio>
+    <audio id="myAudio8" src="{{ url_for( 'static' , filename='screaming.mp3') }}" preload="auto"></audio>
+    <audio id="myAudio9" src="{{ url_for( 'static' , filename='fart.mp3') }}" preload="auto"></audio>
+    <audio id="myAudio10" src="{{ url_for( 'static' , filename='ough.mp3') }}" preload="auto"></audio>
+    <audio id="myAudio11" src="{{ url_for( 'static' , filename='Linga.mp3') }}" preload="auto"></audio>
+    <audio id="myAudio12" src="{{ url_for( 'static' , filename='wait.mp3') }}" preload="auto"></audio>
+    
+
+   
+
+    
     <script>
         let audioCtx, mediaRecorder, audioChunks = [];
         let dest, stream;
