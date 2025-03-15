@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEME Board</title>
+    <style>
+        /* General styling */
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Container for buttons */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        
+        .sound-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Button images */
+        .sound-button img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        /* Hover effect */
+        .sound-button:hover img {
+            transform: scale(1.1);
+            box-shadow: 0px 6px 15px rgba(255, 255, 255, 0.4);
+        }
+
+        /* Click effect */
+        .sound-button:active img {
+            transform: scale(0.9);
+        }
+
+        /* Button labels */
+        .button-label {
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 10px;
+            text-transform: uppercase;
+            color: azure;
+        }
+        .record-button{
+            font-weight: bold; 
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>MEME BOARD</h1>
+    <div class="container">
+        <button onclick="playAudio('myAudio1')" class="sound-button">
+            <img src="https://cdn.shopify.com/s/files/1/1061/1924/products/37_grande.png?v=1571606117" alt="Sound Button">
+            <p class="button-label">GET OUT!!</p>
+        </button>
+
+        <button onclick="playAudio('myAudio2')" class="sound-button">
+            <img src="https://th.bing.com/th/id/OIP.5OOI9b3qUbJOL_yg-RH3RQHaGn?w=224&h=200" alt="Sound Button">
+            <p class="button-label">BRAIN FART</p>
+        </button>
+
+        <button onclick="playAudio('myAudio3')" class="sound-button">
+            <img src="https://creazilla-store.fra1.digitaloceanspaces.com/emojis/45391/speaker-high-volume-emoji-clipart-md.png" alt="Sound Button">
+            <p class="button-label">ALARM</p>
+        </button>
+
+        <button onclick="playAudio('myAudio4')" class="sound-button">
+            <img src="https://www.pngmart.com/files/21/Funny-Emoji-PNG-Transparent.png" alt="Sound Button">
+            <p class="button-label">WTH BRUH</p>
+        </button>
+
+        <button onclick="playAudio('myAudio5')" class="sound-button">
+            <img src="https://th.bing.com/th/id/OIP.F3KbKHHjh4SEWx36HM4F6gHaHi?rs=1" alt="Sound Button">
+            <p class="button-label">UNCANNY</p>
+        </button>
+
+        <button onclick="playAudio('myAudio6')" class="sound-button">
+            <img src="https://cdn.pixabay.com/photo/2020/02/07/12/54/emoji-4827091_640.png" alt="Sound Button">
+            <p class="button-label">WHAT THE HELL</p>
+        </button>
+
+        <button onclick="playAudio('myAudio7')" class="sound-button">
+            <img src="https://cdn.pixabay.com/photo/2020/02/09/09/49/smiley-4832532_1280.png" alt="Sound Button">
+            <p class="button-label">BOOM</p>
+        </button>
+
+        <button onclick="playAudio('myAudio8')" class="sound-button">
+            <img src="https://cdn.pixabay.com/photo/2020/02/09/09/32/smiley-4832479_1280.png" alt="Sound Button">
+            <p class="button-label">SCREAM</p>
+        </button>
+
+        <button onclick="playAudio('myAudio9')" class="sound-button">
+            <img src="https://cdn.pixabay.com/photo/2020/03/11/04/37/emoji-4920963_1280.jpg" alt="Sound Button">
+            <p class="button-label">SCARY</p>
+        </button>
+
+        <button onclick="playAudio('myAudio10')" class="sound-button">
+            <img src="https://i.kym-cdn.com/photos/images/original/001/393/897/f4f" alt="Sound Button">
+            <p class="button-label">ROBLOX</p>
+        </button>
+
+        <button onclick="playAudio('myAudio11')" class="sound-button">
+            <img src="https://as2.ftcdn.net/v2/jpg/06/07/73/23/1000_F_607732318_Lonj1yZ8n2QPCrJukpiHxK24UUMy8U17.jpg" alt="Sound Button">
+            <p class="button-label">LINGANGULE</p>
+        </button>
+
+        <button onclick="playAudio('myAudio12')" class="sound-button">
+            <img src="https://ts1.mm.bing.net/th?id=OIP.hTyvDXHs3WHz8Y496CTIvgHaHa&pid=15.1" alt="Sound Button">
+            <p class="button-label">WAITWAITWAIT</p>
+        </button>
+    </div>
+    
+    <button onclick="startRandomMix()" class="record-button" >🎵 Generate Meme Mix</button>
+    <button onclick="startRecording()" class="record-button">🔴 Start Recording</button>
+    <button onclick="stopRecording()" class="record-button" style="background-color: green;">🛑 Stop & Download</button>
+
+    <audio id="myAudio1" src="Get out sound effect!! - Ttv_thereaper22.mp3"></audio>
+    <audio id="myAudio2" src="Brain fart 🧠💨 - Irish fat boy.mp3"></audio>
+    <audio id="myAudio3" src="Danger alarm meme sound effect - John Hedgehog Sound and Music.mp3"></audio>
+    <audio id="myAudio4" src="Boy what da hell boy meme sound effect - Mr memes.mp3"></audio>
+    <audio id="myAudio5" src="edp bell sound effect - memesandsoundeffects.mp3"></audio>
+    <audio id="myAudio6" src="“Oh my god bruh, oh hell naw man wtf” Audio - AlexSAUCE.mp3"></audio>
+    <audio id="myAudio7" src="Vine boom sound effect - Business Goose.mp3"></audio>
+    <audio id="myAudio8" src="FlightReacts screaming green screen - Joseph Tolmes.mp3"></audio>
+    <audio id="myAudio9" src="Fart with reverb sound effect - Meme Sound FX.mp3"></audio>
+    <audio id="myAudio10" src="Roblox oof sound effect - SKULZ.mp3"></audio>
+    <audio id="myAudio11" src="Linggang guli guli gwacha ling gang goo - DIO Brando.mp3"></audio>
+    <audio id="myAudio12" src="WAITWAITWAIT WHAT DA HELLLLL WAAZZZAAAA (quest ah dog sound effect) - John_YouTube.mp3"></audio>
+    <script>
+        let audioCtx, mediaRecorder, audioChunks = [];
+        let dest, stream;
+
+        function playAudio(id) {
+            let audio = document.getElementById(id);
+            audio.currentTime = 0; 
+            audio.play();
+        }
+
+        function startRecording() {
+            audioCtx = new AudioContext();
+            dest = audioCtx.createMediaStreamDestination();
+
+            let audioElements = [
+                document.getElementById('myAudio1'),
+                document.getElementById('myAudio2'),
+                document.getElementById('myAudio3'),
+                document.getElementById('myAudio4'),
+                document.getElementById('myAudio5'),
+                document.getElementById('myAudio6'),
+                document.getElementById('myAudio7'),
+                document.getElementById('myAudio8'),
+                document.getElementById('myAudio9'),
+                document.getElementById('myAudio10'),
+                document.getElementById('myAudio11'),
+                document.getElementById('myAudio12'),
+
+            ];
+
+            audioElements.forEach(audio => {
+                let track = audioCtx.createMediaElementSource(audio);
+                track.connect(dest);
+                track.connect(audioCtx.destination);
+            });
+
+            stream = dest.stream;
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+
+            console.log("🎤 Recording started...");
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            mediaRecorder.onstop = () => {
+                let audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
+                let audioUrl = URL.createObjectURL(audioBlob);
+                let a = document.createElement("a");
+                a.href = audioUrl;
+                a.download = "Meme_Soundboard_Audio.mp3";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                console.log("🎧 Recording saved.");
+            };
+        }
+        function startRandomMix() {
+    let sounds = [
+        document.getElementById('myAudio1'),
+        document.getElementById('myAudio2'),
+        document.getElementById('myAudio3'),
+        document.getElementById('myAudio4'),
+        document.getElementById('myAudio5'),
+        document.getElementById('myAudio6'),
+        document.getElementById('myAudio7'),
+        document.getElementById('myAudio8'),
+        document.getElementById('myAudio9'),
+        document.getElementById('myAudio10'),
+        document.getElementById('myAudio11'),
+        document.getElementById('myAudio12'),
+    ];
+
+    let totalSounds = Math.floor(Math.random() * 5) + 12; 
+    let selectedSounds = [];
+
+    while (selectedSounds.length < totalSounds) {
+        let randomSound = sounds[Math.floor(Math.random() * sounds.length)];
+        selectedSounds.push(randomSound);
+    }
+
+    selectedSounds.forEach((sound) => {
+        let randomDelay = Math.random() * 1000; 
+
+        setTimeout(() => {
+            sound.currentTime = 0; 
+            sound.play().catch(error => console.error("Playback error:", error));
+        }, randomDelay);
+    });
+}
+
+    </script>     
+</body>
+</html>
