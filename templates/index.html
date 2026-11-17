@@ -1,259 +1,604 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="https://th.bing.com/th/id/OIP.dT0XAE2FuBRjtGX5NhztJgHaHa?rs=1&pid=ImgDetMain">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <title>MEME Board</title>
-    <style>
-        /* General styling */
-        body {
-            background-color: #121212;
-            color: white;
-            font-family: 'Arial', sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEME Board</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤣</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --panel: #1a1a22;
+    --tile: #20202b;
+    --tile-hover: #2a2a38;
+    --line: #33334a;
+    --text: #f2f2f7;
+    --muted: #9a9ab0;
+    --accent: #ffd23f;
+    --hot: #ff4f6d;
+    --cool: #3fc1ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  body.dragging::after {
+    content: 'Drop audio files to add them 🎧';
+    position: fixed; inset: 12px;
+    display: grid; place-items: center;
+    border: 3px dashed var(--accent);
+    border-radius: 20px;
+    background: rgba(15,15,19,.85);
+    font: 1.5rem 'Bungee', sans-serif;
+    z-index: 50;
+    pointer-events: none;
+  }
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(15,15,19,.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 16px;
+  }
+  .bar {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  }
+  h1 {
+    font-family: 'Bungee', sans-serif;
+    font-size: 1.7rem; margin: 0 auto 0 0;
+    letter-spacing: 1px;
+  }
+  h1 span { color: var(--accent); }
+  .btn {
+    font: 700 .9rem 'Inter', sans-serif;
+    border: 0; border-radius: 999px;
+    padding: 9px 16px; cursor: pointer;
+    color: #111; background: var(--accent);
+    transition: transform .1s, filter .15s;
+    white-space: nowrap;
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:active { transform: scale(.95); }
+  .btn.ghost { background: var(--tile); color: var(--text); border: 1px solid var(--line); }
+  .btn.rec { background: var(--hot); color: #fff; }
+  .btn.rec.on { animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: .6; } }
+  .controls { margin-top: 10px; }
+  input[type=search] {
+    flex: 1 1 180px;
+    background: var(--tile); color: var(--text);
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 9px 16px; font: inherit; outline: none;
+  }
+  input[type=search]:focus { border-color: var(--accent); }
+  .vol { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: .9rem; }
+  .vol input { width: 100px; accent-color: var(--accent); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    background: none; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 12px; cursor: pointer; font: 600 .85rem 'Inter', sans-serif;
+    white-space: nowrap;
+  }
+  .chip.on { background: var(--text); color: var(--bg); border-color: var(--text); }
 
-        /* Container for buttons */
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            padding: 20px;
-        }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+  .recording {
+    display: none; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; padding: 12px 16px; margin-bottom: 18px;
+  }
+  .recording.show { display: flex; }
+  .recording audio { flex: 1 1 240px; height: 36px; }
+  .recording a { text-decoration: none; }
 
-        
-        .sound-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: transform 0.2s ease-in-out;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 14px;
+  }
+  .tile { position: relative; }
+  .pad {
+    width: 100%; aspect-ratio: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    background: var(--tile); color: var(--text);
+    border: 2px solid var(--line); border-radius: 18px;
+    cursor: pointer; padding: 10px;
+    transition: transform .1s, background .15s, border-color .15s, box-shadow .15s;
+    font-family: inherit;
+  }
+  .pad:hover { background: var(--tile-hover); transform: translateY(-2px); }
+  .pad:active { transform: scale(.93); }
+  .emoji { font-size: 2.6rem; line-height: 1; }
+  .label { font-weight: 700; font-size: .8rem; text-transform: uppercase; text-align: center; letter-spacing: .5px; }
+  .tile[data-cat=yours] .pad { border-color: #4a3a22; }
+  .tile.playing .pad {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,210,63,.25), 0 0 24px rgba(255,210,63,.35);
+  }
+  .tile.playing .emoji { animation: wobble .35s infinite; }
+  @keyframes wobble { 0%,100% { transform: rotate(-8deg) scale(1.1); } 50% { transform: rotate(8deg) scale(1.15); } }
+  kbd {
+    position: absolute; top: 8px; left: 10px;
+    font: 700 .7rem 'Inter', monospace; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px;
+    pointer-events: none;
+  }
+  .speed input { width: 110px; }
+  .speed .chip { padding: 4px 10px; font-size: .8rem; }
+  .speed-val {
+    min-width: 54px; background: none; border: 0; cursor: pointer;
+    color: var(--muted); font: 700 .85rem 'Inter', monospace;
+  }
+  .speed-val.changed { color: var(--accent); }
+  .fav {
+    position: absolute; top: 4px; right: 6px;
+    background: none; border: 0; cursor: pointer;
+    font-size: 1.15rem; line-height: 1; padding: 4px;
+    color: var(--muted); opacity: .5; transition: opacity .15s, transform .1s;
+  }
+  .tile:hover .fav { opacity: 1; }
+  .fav:active { transform: scale(.8); }
+  .fav.on { color: var(--accent); opacity: 1; }
+  @media (hover: none) { .fav { opacity: .9; } }
+  .del {
+    position: absolute; bottom: 8px; left: 8px;
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 0; background: rgba(0,0,0,.4); color: var(--muted);
+    cursor: pointer; font-size: .9rem; line-height: 1;
+  }
+  .del:hover { background: var(--hot); color: #fff; }
+  .dl {
+    position: absolute; bottom: 8px; right: 8px;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: rgba(0,0,0,.35); color: var(--muted);
+    text-decoration: none; font-size: .85rem;
+    opacity: .55; transition: opacity .15s, background .15s, color .15s;
+  }
+  .tile:hover .dl { opacity: 1; }
+  .dl:hover { background: var(--accent); color: #111; opacity: 1; }
+  @media (hover: none) { .dl { opacity: .9; } }
+  .add .pad { border-style: dashed; color: var(--muted); }
+  .empty { color: var(--muted); grid-column: 1 / -1; text-align: center; padding: 40px 0; }
+  .hint { color: var(--muted); font-size: .8rem; text-align: center; margin-top: 30px; }
 
-        /* Button images */
-        .sound-button img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.2);
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
+  .toast {
+    position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%) translateY(80px);
+    background: var(--text); color: var(--bg); font-weight: 700;
+    padding: 10px 18px; border-radius: 999px; transition: transform .25s; z-index: 60;
+    max-width: calc(100% - 32px);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
 
-        /* Hover effect */
-        .sound-button:hover img {
-            transform: scale(1.1);
-            box-shadow: 0px 6px 15px rgba(255, 255, 255, 0.4);
-        }
-
-        /* Click effect */
-        .sound-button:active img {
-            transform: scale(0.9);
-        }
-
-        /* Button labels */
-        .button-label {
-            font-weight: bold;
-            font-size: 14px;
-            margin-top: 10px;
-            text-transform: uppercase;
-            color: azure;
-        }
-        .record-button{
-            font-weight: bold; 
-            border-radius: 20px;
-            margin-bottom: 20px;
-            size : 50px
-        }
-    </style>
+  @media (max-width: 600px) {
+    header { position: static; }
+    h1 { font-size: 1.3rem; }
+    .speed input { flex: 1; min-width: 60px; }
+    .dl { width: 24px; height: 24px; bottom: 5px; right: 5px; font-size: .75rem; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+    .emoji { font-size: 2rem; }
+    kbd { display: none; }
+  }
+</style>
 </head>
 <body>
-    <h1 style="font-weight: bold;">MEME BOARD</h1>
-    <hr>
-    <div class="container">
-        <button onclick="playAudio('myAudio1')" class="sound-button">
-            <img src="https://cdn.shopify.com/s/files/1/1061/1924/products/37_grande.png?v=1571606117" alt="Sound Button">
-            <p class="button-label">GET OUT!!</p>
-        </button>
-
-        <button onclick="playAudio('myAudio2')" class="sound-button">
-            <img src="https://th.bing.com/th/id/OIP.5OOI9b3qUbJOL_yg-RH3RQHaGn?w=224&h=200" alt="Sound Button">
-            <p class="button-label">BRAIN FART</p>
-        </button>
-
-        <button onclick="playAudio('myAudio3')" class="sound-button">
-            <img src="https://creazilla-store.fra1.digitaloceanspaces.com/emojis/45391/speaker-high-volume-emoji-clipart-md.png" alt="Sound Button">
-            <p class="button-label">ALARM</p>
-        </button>
-
-        <button onclick="playAudio('myAudio4')" class="sound-button">
-            <img src="https://www.pngmart.com/files/21/Funny-Emoji-PNG-Transparent.png" alt="Sound Button">
-            <p class="button-label">WTH BRUH</p>
-        </button>
-
-        <button onclick="playAudio('myAudio5')" class="sound-button">
-            <img src="https://th.bing.com/th/id/OIP.F3KbKHHjh4SEWx36HM4F6gHaHi?rs=1" alt="Sound Button">
-            <p class="button-label">UNCANNY</p>
-        </button>
-
-        <button onclick="playAudio('myAudio6')" class="sound-button">
-            <img src="https://cdn.pixabay.com/photo/2020/02/07/12/54/emoji-4827091_640.png" alt="Sound Button">
-            <p class="button-label">WHAT THE HELL</p>
-        </button>
-
-        <button onclick="playAudio('myAudio7')" class="sound-button">
-            <img src="https://cdn.pixabay.com/photo/2020/02/09/09/49/smiley-4832532_1280.png" alt="Sound Button">
-            <p class="button-label">BOOM</p>
-        </button>
-
-        <button onclick="playAudio('myAudio8')" class="sound-button">
-            <img src="https://cdn.pixabay.com/photo/2020/02/09/09/32/smiley-4832479_1280.png" alt="Sound Button">
-            <p class="button-label">SCREAM</p>
-        </button>
-
-        <button onclick="playAudio('myAudio9')" class="sound-button">
-            <img src="https://cdn.pixabay.com/photo/2020/03/11/04/37/emoji-4920963_1280.jpg" alt="Sound Button">
-            <p class="button-label">FART</p>
-        </button>
-
-        <button onclick="playAudio('myAudio10')" class="sound-button">
-            <img src="https://i.kym-cdn.com/photos/images/original/001/393/897/f4f" alt="Sound Button">
-            <p class="button-label">ROBLOX</p>
-        </button>
-
-        <button onclick="playAudio('myAudio11')" class="sound-button">
-            <img src="https://as2.ftcdn.net/v2/jpg/06/07/73/23/1000_F_607732318_Lonj1yZ8n2QPCrJukpiHxK24UUMy8U17.jpg" alt="Sound Button">
-            <p class="button-label">LINGANGULE</p>
-        </button>
-
-        <button onclick="playAudio('myAudio12')" class="sound-button">
-            <img src="https://ts1.mm.bing.net/th?id=OIP.hTyvDXHs3WHz8Y496CTIvgHaHa&pid=15.1" alt="Sound Button">
-            <p class="button-label">WAITWAITWAIT</p>
-        </button>
+<header>
+  <div class="bar">
+    <h1>MEME <span>BOARD</span></h1>
+    <button class="btn" id="mixBtn">🎲 Meme Mix</button>
+    <button class="btn rec" id="recBtn">⏺ Record</button>
+    <button class="btn ghost" id="stopBtn">⏹ Stop all</button>
+  </div>
+  <div class="bar controls">
+    <input type="search" id="search" placeholder="Search sounds…" autocomplete="off">
+    <div class="chips" id="chips">
+      <button class="chip on" data-cat="all">All</button>
+      <button class="chip" data-cat="favs">★ Favorites</button>
+      <button class="chip" data-cat="memes">Memes</button>
+      <button class="chip" data-cat="yours">Yours</button>
     </div>
-    
-    <button onclick="startRandomMix()" class="btn btn-primary" style="margin-right: 20px; margin-bottom: 20px;">🎵 Generate Meme Mix</button>
-    <button onclick="startRecording()" class="btn btn-danger" style="margin-right: 20px; margin-bottom: 20px;">Start Recording</button>
-    <button onclick="stopRecording()" class="btn btn-info" style="margin-right: 20px; margin-bottom: 20px;">Stop & Download</button>
+    <label class="vol">🔈 <input type="range" id="vol" min="0" max="1" step="0.01" value="0.8"></label>
+    <div class="vol speed" title="Playback speed and pitch">
+      <button class="chip" data-speed="0.65">🐢 Deep</button>
+      <input type="range" id="speed" min="0.5" max="2" step="0.05" value="1" aria-label="Speed">
+      <button class="chip" data-speed="1.6">🐿️ Chipmunk</button>
+      <button class="speed-val" id="speedVal" title="Reset to normal">1.00×</button>
+    </div>
+  </div>
+</header>
 
-    <audio id="myAudio1" src="{{ url_for( 'static' , filename='getout.mp3') }}" preload="auto"></audio>
-    <audio id="myAudio2" src="{{ url_for( 'static' , filename='brain_fart.mp3') }}" preload="auto"></audio>
-    <audio id="myAudio3" src="{{ url_for( 'static' , filename='alarm.mp3') }}" preload="auto"></audio>
-    <audio id="myAudio4" src="{{ url_for( 'static' , filename='boy_wth.mp3') }}" preload="auto"></audio>
-    <audio id="myAudio5" src="{{ url_for( 'static' , filename='bell.mp3') }}" preload="auto"></audio>
-    <audio id="myAudio6" src="{{ url_for( 'static' , filename='omg.mp3') }}" preload="auto"></audio>
-    <audio id="myAudio7" src="{{ url_for( 'static' , filename='boom.mp3') }}" preload="auto"></audio>
-    <audio id="myAudio8" src="{{ url_for( 'static' , filename='screaming.mp3') }}" preload="auto"></audio>
-    <audio id="myAudio9" src="{{ url_for( 'static' , filename='fart.mp3') }}" preload="auto"></audio>
-    <audio id="myAudio10" src="{{ url_for( 'static' , filename='ough.mp3') }}" preload="auto"></audio>
-    <audio id="myAudio11" src="{{ url_for( 'static' , filename='linga.mp3') }}" preload="auto"></audio>
-    <audio id="myAudio12" src="{{ url_for( 'static' , filename='wait.mp3') }}" preload="auto"></audio>
-    
+<main>
+  <div class="recording" id="recPanel">
+    <strong>🎧 Your mix</strong>
+    <audio id="recAudio" controls></audio>
+    <a class="btn" id="recDownload" download>⬇ Download</a>
+  </div>
+  <div class="grid" id="grid"></div>
+  <p class="hint">Press the keys shown on each pad to play · ⬇ downloads a sound · ☆ adds to favorites · Esc stops everything · Drag & drop your own audio files anywhere to add them</p>
+</main>
 
-   
+<input type="file" id="fileInput" accept="audio/*" multiple hidden>
+<div class="toast" id="toast"></div>
 
-    
-    <script>
-        let audioCtx, mediaRecorder, audioChunks = [];
-        let dest, stream;
+<script>
+const FILE_SOUNDS = {{ sounds|tojson }};
 
-        function playAudio(id) {
-            let audio = document.getElementById(id);
-            audio.currentTime = 0; 
-            audio.play();
-        }
+/* ---------- Audio engine ---------- */
 
-        function startRecording() {
-            audioCtx = new AudioContext();
-            dest = audioCtx.createMediaStreamDestination();
+let ctx = null, master = null, recDest = null;
+let volume = 0.8, speed = 1;
+try { const v = parseFloat(localStorage.getItem('memeboard-vol')); if (!isNaN(v)) volume = v; } catch (e) {}
+try { const v = parseFloat(localStorage.getItem('memeboard-speed')); if (!isNaN(v)) speed = v; } catch (e) {}
 
-            let audioElements = [
-                document.getElementById('myAudio1'),
-                document.getElementById('myAudio2'),
-                document.getElementById('myAudio3'),
-                document.getElementById('myAudio4'),
-                document.getElementById('myAudio5'),
-                document.getElementById('myAudio6'),
-                document.getElementById('myAudio7'),
-                document.getElementById('myAudio8'),
-                document.getElementById('myAudio9'),
-                document.getElementById('myAudio10'),
-                document.getElementById('myAudio11'),
-                document.getElementById('myAudio12'),
+const buffers = new Map();   // sound id -> Promise<AudioBuffer>
+const active = new Set();    // currently playing output nodes
+let mixTimers = [];
 
-            ];
-
-            audioElements.forEach(audio => {
-                let track = audioCtx.createMediaElementSource(audio);
-                track.connect(dest);
-                track.connect(audioCtx.destination);
-            });
-
-            stream = dest.stream;
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.start();
-            mediaRecorder.ondataavailable = event => {
-                audioChunks.push(event.data);
-            };
-
-            console.log("🎤 Recording started...");
-        }
-
-        function stopRecording() {
-            mediaRecorder.stop();
-            mediaRecorder.onstop = () => {
-                let audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
-                let audioUrl = URL.createObjectURL(audioBlob);
-                let a = document.createElement("a");
-                a.href = audioUrl;
-                a.download = "Meme_Soundboard_Audio.mp3";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                console.log("🎧 Recording saved.");
-            };
-        }
-        function startRandomMix() {
-    let sounds = [
-        document.getElementById('myAudio1'),
-        document.getElementById('myAudio2'),
-        document.getElementById('myAudio3'),
-        document.getElementById('myAudio4'),
-        document.getElementById('myAudio5'),
-        document.getElementById('myAudio6'),
-        document.getElementById('myAudio7'),
-        document.getElementById('myAudio8'),
-        document.getElementById('myAudio9'),
-        document.getElementById('myAudio10'),
-        document.getElementById('myAudio11'),
-        document.getElementById('myAudio12'),
-    ];
-
-    let totalSounds = Math.floor(Math.random() * 5) + 12; 
-    let selectedSounds = [];
-
-    while (selectedSounds.length < totalSounds) {
-        let randomSound = sounds[Math.floor(Math.random() * sounds.length)];
-        selectedSounds.push(randomSound);
-    }
-
-    selectedSounds.forEach((sound) => {
-        let randomDelay = Math.random() * 1000; 
-
-        setTimeout(() => {
-            sound.currentTime = 0; 
-            sound.play().catch(error => console.error("Playback error:", error));
-        }, randomDelay);
-    });
+function audio() {
+  if (!ctx) {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain();
+    master.gain.value = volume;
+    const comp = ctx.createDynamicsCompressor();   // keeps chaotic mixes from clipping
+    master.connect(comp);
+    comp.connect(ctx.destination);
+    recDest = ctx.createMediaStreamDestination();
+    comp.connect(recDest);
+    setTimeout(() => FILE_SOUNDS.forEach(s => load(s).catch(() => {})), 0);
+  }
+  if (ctx.state === 'suspended') ctx.resume();
+  return ctx;
 }
 
-    </script>     
+function load(s) {
+  if (!buffers.has(s.id)) {
+    const p = (s.blob ? s.blob.arrayBuffer() : fetch(s.url).then(r => {
+      if (!r.ok) throw new Error(r.status);
+      return r.arrayBuffer();
+    })).then(ab => ctx.decodeAudioData(ab));
+    p.catch(() => buffers.delete(s.id));
+    buffers.set(s.id, p);
+  }
+  return buffers.get(s.id);
+}
+
+async function play(s) {
+  const c = audio();
+  const out = c.createGain();
+  out.connect(master);
+  let dur;
+  try {
+    const buf = await load(s);
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = speed;
+    src.connect(out);
+    src.start();
+    dur = buf.duration / speed;
+  } catch (e) {
+    out.disconnect();
+    toast(`Couldn't play "${s.label}"`);
+    return;
+  }
+  active.add(out);
+  flash(s.id, dur);
+  setTimeout(() => { if (active.delete(out)) out.disconnect(); }, dur * 1000 + 300);
+}
+
+function stopAll() {
+  mixTimers.forEach(clearTimeout);
+  mixTimers = [];
+  active.forEach(out => out.disconnect());
+  active.clear();
+  playing.clear();
+  document.querySelectorAll('.tile.playing').forEach(el => el.classList.remove('playing'));
+}
+
+function randomMix() {
+  audio();
+  if (!ALL.length) return;
+  const n = 8 + Math.floor(Math.random() * 7);
+  for (let i = 0; i < n; i++) {
+    const s = ALL[Math.floor(Math.random() * ALL.length)];
+    mixTimers.push(setTimeout(() => play(s), Math.random() * 2500));
+  }
+}
+
+/* ---------- Recording ---------- */
+
+let rec = null, recUrl = null;
+const recBtn = document.getElementById('recBtn');
+
+function toggleRecord() {
+  audio();
+  if (rec && rec.state === 'recording') { rec.stop(); return; }
+  if (!window.MediaRecorder) { toast('Recording isn’t supported in this browser'); return; }
+
+  const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4']
+    .find(m => MediaRecorder.isTypeSupported(m)) || '';
+  const chunks = [];
+  const r = new MediaRecorder(recDest.stream, mime ? { mimeType: mime } : undefined);
+  r.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+  r.onstop = () => {
+    const type = r.mimeType || mime || 'audio/webm';
+    const ext = type.includes('ogg') ? 'ogg' : type.includes('mp4') ? 'm4a' : 'webm';
+    showRecording(new Blob(chunks, { type }), ext);
+    setRecUI(false);
+  };
+  r.start(250);
+  rec = r;
+  setRecUI(true);
+}
+
+let recTick = null;
+function setRecUI(on) {
+  clearInterval(recTick);
+  recBtn.classList.toggle('on', on);
+  if (!on) { recBtn.textContent = '⏺ Record'; return; }
+  const start = Date.now();
+  const update = () => {
+    const s = Math.floor((Date.now() - start) / 1000);
+    recBtn.textContent = `⏹ Stop ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  };
+  update();
+  recTick = setInterval(update, 500);
+}
+
+function showRecording(blob, ext) {
+  if (recUrl) URL.revokeObjectURL(recUrl);
+  recUrl = URL.createObjectURL(blob);
+  document.getElementById('recAudio').src = recUrl;
+  const a = document.getElementById('recDownload');
+  a.href = recUrl;
+  a.download = `meme-mix-${new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-')}.${ext}`;
+  document.getElementById('recPanel').classList.add('show');
+}
+
+/* ---------- Your own sounds (saved in this browser) ---------- */
+
+const DB = {
+  open() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('memeboard', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('sounds', { keyPath: 'id' });
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+  },
+  async tx(mode, fn) {
+    const db = await this.open();
+    return new Promise((res, rej) => {
+      const t = db.transaction('sounds', mode);
+      const req = fn(t.objectStore('sounds'));
+      t.oncomplete = () => res(req && req.result);
+      t.onerror = () => rej(t.error);
+    });
+  },
+  all() { return this.tx('readonly', s => s.getAll()); },
+  put(v) { return this.tx('readwrite', s => s.put(v)); },
+  del(id) { return this.tx('readwrite', s => s.delete(id)); },
+};
+
+let CUSTOM = [];
+
+async function addFiles(files) {
+  const audioFiles = [...files].filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|webm)$/i.test(f.name));
+  if (!audioFiles.length) { toast('Those aren’t audio files'); return; }
+  for (const f of audioFiles) {
+    if (f.size > 15 * 1024 * 1024) { toast(`${f.name} is too big (max 15 MB)`); continue; }
+    const s = {
+      id: 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      label: f.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').slice(0, 40),
+      emoji: '⭐', cat: 'yours', blob: f,
+    };
+    try { await DB.put({ id: s.id, label: s.label, emoji: s.emoji, blob: f }); }
+    catch (e) { toast('Added, but this browser won’t keep it after reload'); }
+    CUSTOM.push(s);
+  }
+  rebuild();
+  toast(`Added ${audioFiles.length} sound${audioFiles.length > 1 ? 's' : ''} 🎉`);
+}
+
+async function removeCustom(id) {
+  CUSTOM = CUSTOM.filter(s => s.id !== id);
+  buffers.delete(id);
+  try { await DB.del(id); } catch (e) {}
+  rebuild();
+}
+
+/* ---------- UI ---------- */
+
+const KEYS = '1234567890qwertyuiopasdfghjklzxcvbnm';
+let ALL = [];
+let filterCat = 'all';
+const grid = document.getElementById('grid');
+const search = document.getElementById('search');
+const playing = new Map();   // sound id -> number of overlapping plays
+
+let favs = new Set();
+try { favs = new Set(JSON.parse(localStorage.getItem('memeboard-favs') || '[]')); } catch (e) {}
+
+function toggleFav(id) {
+  favs.has(id) ? favs.delete(id) : favs.add(id);
+  try { localStorage.setItem('memeboard-favs', JSON.stringify([...favs])); } catch (e) {}
+  rebuild();
+}
+
+function rebuild() {
+  const all = [...FILE_SOUNDS, ...CUSTOM];
+  // favorites float to the top (and so get the easiest keyboard keys)
+  ALL = [...all.filter(s => favs.has(s.id)), ...all.filter(s => !favs.has(s.id))];
+  ALL.forEach((s, i) => { s.key = KEYS[i] || ''; });
+  render();
+}
+
+function render() {
+  const q = search.value.trim().toLowerCase();
+  grid.innerHTML = '';
+  const shown = ALL.filter(s =>
+    (filterCat === 'all' || (filterCat === 'favs' ? favs.has(s.id) : s.cat === filterCat)) &&
+    (!q || s.label.toLowerCase().includes(q)));
+
+  for (const s of shown) {
+    const tile = document.createElement('div');
+    tile.className = 'tile' + (playing.get(s.id) ? ' playing' : '');
+    tile.dataset.id = s.id;
+    tile.dataset.cat = s.cat;
+
+    const pad = document.createElement('button');
+    pad.className = 'pad';
+    pad.innerHTML = `<span class="emoji"></span><span class="label"></span>`;
+    pad.querySelector('.emoji').textContent = s.emoji;
+    pad.querySelector('.label').textContent = s.label;
+    pad.onclick = () => play(s);
+    tile.appendChild(pad);
+
+    if (s.key) {
+      const k = document.createElement('kbd');
+      k.textContent = s.key.toUpperCase();
+      tile.appendChild(k);
+    }
+    const dl = document.createElement('a');
+    dl.className = 'dl';
+    dl.title = 'Download';
+    dl.textContent = '⬇';
+    const ext = s.url ? s.url.split('.').pop() : ((s.blob && s.blob.name || '').split('.').pop() || 'mp3');
+    dl.download = s.label.replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') + '.' + ext;
+    if (s.url) {
+      dl.href = s.url;
+    } else {
+      dl.href = '#';
+      dl.onclick = () => {
+        const u = URL.createObjectURL(s.blob);
+        dl.href = u;
+        setTimeout(() => { URL.revokeObjectURL(u); dl.href = '#'; }, 1000);
+      };
+    }
+    tile.appendChild(dl);
+
+    const fav = document.createElement('button');
+    fav.className = 'fav' + (favs.has(s.id) ? ' on' : '');
+    fav.title = favs.has(s.id) ? 'Remove from favorites' : 'Add to favorites';
+    fav.textContent = favs.has(s.id) ? '★' : '☆';
+    fav.onclick = () => toggleFav(s.id);
+    tile.appendChild(fav);
+
+    if (s.cat === 'yours') {
+      const del = document.createElement('button');
+      del.className = 'del';
+      del.title = 'Remove';
+      del.textContent = '×';
+      del.onclick = () => removeCustom(s.id);
+      tile.appendChild(del);
+    }
+    grid.appendChild(tile);
+  }
+
+  if (!q && (filterCat === 'all' || filterCat === 'yours')) {
+    const tile = document.createElement('div');
+    tile.className = 'tile add';
+    tile.innerHTML = `<button class="pad"><span class="emoji">➕</span><span class="label">Add your own</span></button>`;
+    tile.querySelector('button').onclick = () => document.getElementById('fileInput').click();
+    grid.appendChild(tile);
+  } else if (!shown.length) {
+    grid.innerHTML = filterCat === 'favs' && !q
+      ? `<p class="empty">No favorites yet — tap ☆ on any sound to pin it here ⭐</p>`
+      : `<p class="empty">No sounds match 🤷</p>`;
+  }
+}
+
+function flash(id, dur) {
+  playing.set(id, (playing.get(id) || 0) + 1);
+  document.querySelector(`.tile[data-id="${id}"]`)?.classList.add('playing');
+  setTimeout(() => {
+    const n = (playing.get(id) || 1) - 1;
+    if (n > 0) { playing.set(id, n); return; }
+    playing.delete(id);
+    document.querySelector(`.tile[data-id="${id}"]`)?.classList.remove('playing');
+  }, dur * 1000);
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ---------- Wiring ---------- */
+
+document.getElementById('mixBtn').onclick = randomMix;
+document.getElementById('stopBtn').onclick = stopAll;
+recBtn.onclick = toggleRecord;
+search.oninput = render;
+
+document.getElementById('chips').onclick = e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  filterCat = chip.dataset.cat;
+  document.querySelectorAll('#chips .chip').forEach(c => c.classList.toggle('on', c === chip));
+  render();
+};
+
+const volInput = document.getElementById('vol');
+volInput.value = volume;
+volInput.oninput = () => {
+  volume = parseFloat(volInput.value);
+  if (master) master.gain.setTargetAtTime(volume, ctx.currentTime, 0.02);
+  try { localStorage.setItem('memeboard-vol', volume); } catch (e) {}
+};
+
+const speedInput = document.getElementById('speed');
+const speedVal = document.getElementById('speedVal');
+function setSpeed(v) {
+  speed = Math.min(2, Math.max(0.5, v));
+  speedInput.value = speed;
+  speedVal.textContent = speed.toFixed(2) + '×';
+  speedVal.classList.toggle('changed', speed !== 1);
+  try { localStorage.setItem('memeboard-speed', speed); } catch (e) {}
+}
+speedInput.oninput = () => setSpeed(parseFloat(speedInput.value));
+speedVal.onclick = () => setSpeed(1);
+document.querySelectorAll('[data-speed]').forEach(b => b.onclick = () => setSpeed(parseFloat(b.dataset.speed)));
+setSpeed(speed);
+
+const fileInput = document.getElementById('fileInput');
+fileInput.onchange = () => { addFiles(fileInput.files); fileInput.value = ''; };
+
+let dragDepth = 0;
+window.addEventListener('dragenter', e => { if (e.dataTransfer?.types.includes('Files')) { dragDepth++; document.body.classList.add('dragging'); } });
+window.addEventListener('dragleave', () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('dragging'); } });
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => {
+  e.preventDefault();
+  dragDepth = 0;
+  document.body.classList.remove('dragging');
+  if (e.dataTransfer?.files.length) addFiles(e.dataTransfer.files);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, textarea') || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === 'Escape') { stopAll(); return; }
+  if (e.repeat) return;
+  const s = ALL.find(x => x.key && x.key === e.key.toLowerCase());
+  if (s) { e.preventDefault(); play(s); }
+});
+
+rebuild();
+DB.all().then(rows => {
+  CUSTOM = (rows || []).map(r => ({ ...r, cat: 'yours' }));
+  if (CUSTOM.length) rebuild();
+}).catch(() => {});
+</script>
 </body>
 </html>
