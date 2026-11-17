@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MEME Board</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤣</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@500;700&display=swap" rel="stylesheet">
@@ -29,7 +30,7 @@
     min-height: 100vh;
   }
   body.dragging::after {
-    content: 'Drop audio files to add them 🎧';
+    content: 'Drop audio files to add them';
     position: fixed; inset: 12px;
     display: grid; place-items: center;
     border: 3px dashed var(--accent);
@@ -116,14 +117,18 @@
   }
   .pad:hover { background: var(--tile-hover); transform: translateY(-2px); }
   .pad:active { transform: scale(.93); }
-  .emoji { font-size: 2.6rem; line-height: 1; }
+  .icon { font-size: 2.6rem; line-height: 1; color: hsl(var(--h) 85% 68%); transition: color .15s; }
+  .tile:not(.add) .pad { background: linear-gradient(160deg, hsl(var(--h) 45% 17%), var(--tile) 70%); }
+  .tile:not(.add) .pad:hover { background: linear-gradient(160deg, hsl(var(--h) 50% 22%), var(--tile-hover) 70%); }
+  .btn .ti, .chip .ti { font-size: 1.05em; vertical-align: -2px; margin-right: 2px; }
   .label { font-weight: 700; font-size: .8rem; text-transform: uppercase; text-align: center; letter-spacing: .5px; }
   .tile[data-cat=yours] .pad { border-color: #4a3a22; }
   .tile.playing .pad {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(255,210,63,.25), 0 0 24px rgba(255,210,63,.35);
   }
-  .tile.playing .emoji { animation: wobble .35s infinite; }
+  .tile.playing .icon { color: var(--accent); }
+  .tile.playing .icon { animation: wobble .35s infinite; }
   @keyframes wobble { 0%,100% { transform: rotate(-8deg) scale(1.1); } 50% { transform: rotate(8deg) scale(1.15); } }
   kbd {
     position: absolute; top: 8px; left: 10px;
@@ -138,8 +143,32 @@
     color: var(--muted); font: 700 .85rem 'Inter', monospace;
   }
   .speed-val.changed { color: var(--accent); }
+  .pad.has-img {
+    position: relative; overflow: hidden; padding: 0;
+    justify-content: flex-end; background: #000 !important;
+  }
+  .pad.has-img img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; transition: transform .25s;
+  }
+  .pad.has-img::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,.45), transparent 28%, transparent 50%, rgba(0,0,0,.9));
+  }
+  .pad.has-img .label {
+    position: relative; z-index: 1; padding: 0 8px 10px;
+    color: #fff; text-shadow: 0 1px 3px #000;
+  }
+  .pad.has-img:hover img { transform: scale(1.06); }
+  .tile.playing .pad.has-img img { transform: scale(1.12); }
+  kbd, .fav, .dl, .del { z-index: 2; }
+  kbd { background: rgba(0,0,0,.55); color: #ddd; }
+  .tile .dl { background: rgba(0,0,0,.6); color: #eee; opacity: .85; }
+  .tile .fav { color: #fff; opacity: .85; }
+  .tile .fav.on { color: var(--accent); opacity: 1; }
   .fav {
     position: absolute; top: 4px; right: 6px;
+    text-shadow: 0 1px 3px rgba(0,0,0,.8);
     background: none; border: 0; cursor: pointer;
     font-size: 1.15rem; line-height: 1; padding: 4px;
     color: var(--muted); opacity: .5; transition: opacity .15s, transform .1s;
@@ -156,7 +185,7 @@
   }
   .del:hover { background: var(--hot); color: #fff; }
   .dl {
-    position: absolute; bottom: 8px; right: 8px;
+    position: absolute; top: 6px; right: 36px;
     width: 28px; height: 28px; border-radius: 50%;
     display: grid; place-items: center;
     background: rgba(0,0,0,.35); color: var(--muted);
@@ -173,18 +202,19 @@
   .toast {
     position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%) translateY(80px);
     background: var(--text); color: var(--bg); font-weight: 700;
-    padding: 10px 18px; border-radius: 999px; transition: transform .25s; z-index: 60;
+    padding: 10px 18px; border-radius: 999px; transition: transform .25s, opacity .25s; z-index: 60;
+    opacity: 0; pointer-events: none;
     max-width: calc(100% - 32px);
   }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
   @media (max-width: 600px) {
     header { position: static; }
     h1 { font-size: 1.3rem; }
     .speed input { flex: 1; min-width: 60px; }
-    .dl { width: 24px; height: 24px; bottom: 5px; right: 5px; font-size: .75rem; }
+    .dl { width: 24px; height: 24px; top: 6px; right: 32px; font-size: .75rem; }
     .grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-    .emoji { font-size: 2rem; }
+    .icon { font-size: 2rem; }
     kbd { display: none; }
   }
 </style>
@@ -193,23 +223,23 @@
 <header>
   <div class="bar">
     <h1>MEME <span>BOARD</span></h1>
-    <button class="btn" id="mixBtn">🎲 Meme Mix</button>
-    <button class="btn rec" id="recBtn">⏺ Record</button>
-    <button class="btn ghost" id="stopBtn">⏹ Stop all</button>
+    <button class="btn" id="mixBtn"><i class="ti ti-arrows-shuffle"></i> Meme Mix</button>
+    <button class="btn rec" id="recBtn"><i class="ti ti-player-record-filled"></i> Record</button>
+    <button class="btn ghost" id="stopBtn"><i class="ti ti-player-stop-filled"></i> Stop all</button>
   </div>
   <div class="bar controls">
     <input type="search" id="search" placeholder="Search sounds…" autocomplete="off">
     <div class="chips" id="chips">
       <button class="chip on" data-cat="all">All</button>
-      <button class="chip" data-cat="favs">★ Favorites</button>
+      <button class="chip" data-cat="favs"><i class="ti ti-star-filled"></i> Favorites</button>
       <button class="chip" data-cat="memes">Memes</button>
       <button class="chip" data-cat="yours">Yours</button>
     </div>
-    <label class="vol">🔈 <input type="range" id="vol" min="0" max="1" step="0.01" value="0.8"></label>
+    <label class="vol"><i class="ti ti-volume"></i> <input type="range" id="vol" min="0" max="1" step="0.01" value="0.8"></label>
     <div class="vol speed" title="Playback speed and pitch">
-      <button class="chip" data-speed="0.65">🐢 Deep</button>
+      <button class="chip" data-speed="0.65"><i class="ti ti-chevrons-down"></i> Deep</button>
       <input type="range" id="speed" min="0.5" max="2" step="0.05" value="1" aria-label="Speed">
-      <button class="chip" data-speed="1.6">🐿️ Chipmunk</button>
+      <button class="chip" data-speed="1.6"><i class="ti ti-chevrons-up"></i> Chipmunk</button>
       <button class="speed-val" id="speedVal" title="Reset to normal">1.00×</button>
     </div>
   </div>
@@ -217,12 +247,12 @@
 
 <main>
   <div class="recording" id="recPanel">
-    <strong>🎧 Your mix</strong>
+    <strong><i class="ti ti-headphones"></i> Your mix</strong>
     <audio id="recAudio" controls></audio>
-    <a class="btn" id="recDownload" download>⬇ Download</a>
+    <a class="btn" id="recDownload" download><i class="ti ti-download"></i> Download</a>
   </div>
   <div class="grid" id="grid"></div>
-  <p class="hint">Press the keys shown on each pad to play · ⬇ downloads a sound · ☆ adds to favorites · Esc stops everything · Drag & drop your own audio files anywhere to add them</p>
+  <p class="hint">Press the keys shown on each pad to play · <i class="ti ti-download"></i> downloads a sound · <i class="ti ti-star"></i> adds to favorites · Esc stops everything · Drag & drop your own audio files anywhere to add them</p>
 </main>
 
 <input type="file" id="fileInput" accept="audio/*" multiple hidden>
@@ -342,11 +372,11 @@ let recTick = null;
 function setRecUI(on) {
   clearInterval(recTick);
   recBtn.classList.toggle('on', on);
-  if (!on) { recBtn.textContent = '⏺ Record'; return; }
+  if (!on) { recBtn.innerHTML = '<i class="ti ti-player-record-filled"></i> Record'; return; }
   const start = Date.now();
   const update = () => {
     const s = Math.floor((Date.now() - start) / 1000);
-    recBtn.textContent = `⏹ Stop ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    recBtn.innerHTML = `<i class="ti ti-player-stop-filled"></i> Stop ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   };
   update();
   recTick = setInterval(update, 500);
@@ -397,14 +427,14 @@ async function addFiles(files) {
     const s = {
       id: 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
       label: f.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').slice(0, 40),
-      emoji: '⭐', cat: 'yours', blob: f,
+      icon: 'music', cat: 'yours', blob: f,
     };
-    try { await DB.put({ id: s.id, label: s.label, emoji: s.emoji, blob: f }); }
+    try { await DB.put({ id: s.id, label: s.label, icon: s.icon, blob: f }); }
     catch (e) { toast('Added, but this browser won’t keep it after reload'); }
     CUSTOM.push(s);
   }
   rebuild();
-  toast(`Added ${audioFiles.length} sound${audioFiles.length > 1 ? 's' : ''} 🎉`);
+  toast(`Added ${audioFiles.length} sound${audioFiles.length > 1 ? 's' : ''}`);
 }
 
 async function removeCustom(id) {
@@ -452,11 +482,18 @@ function render() {
     tile.className = 'tile' + (playing.get(s.id) ? ' playing' : '');
     tile.dataset.id = s.id;
     tile.dataset.cat = s.cat;
+    tile.style.setProperty('--h', Math.round((ALL.indexOf(s) * 137.508) % 360));
 
     const pad = document.createElement('button');
     pad.className = 'pad';
-    pad.innerHTML = `<span class="emoji"></span><span class="label"></span>`;
-    pad.querySelector('.emoji').textContent = s.emoji;
+    if (s.img) {
+      pad.classList.add('has-img');
+      pad.innerHTML = `<img alt="" loading="lazy" draggable="false"><span class="label"></span>`;
+      pad.querySelector('img').src = s.img;
+    } else {
+      pad.innerHTML = `<i class="icon ti"></i><span class="label"></span>`;
+      pad.querySelector('.icon').classList.add('ti-' + (s.icon || 'music'));
+    }
     pad.querySelector('.label').textContent = s.label;
     pad.onclick = () => play(s);
     tile.appendChild(pad);
@@ -469,7 +506,7 @@ function render() {
     const dl = document.createElement('a');
     dl.className = 'dl';
     dl.title = 'Download';
-    dl.textContent = '⬇';
+    dl.innerHTML = '<i class="ti ti-download"></i>';
     const ext = s.url ? s.url.split('.').pop() : ((s.blob && s.blob.name || '').split('.').pop() || 'mp3');
     dl.download = s.label.replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') + '.' + ext;
     if (s.url) {
@@ -487,7 +524,7 @@ function render() {
     const fav = document.createElement('button');
     fav.className = 'fav' + (favs.has(s.id) ? ' on' : '');
     fav.title = favs.has(s.id) ? 'Remove from favorites' : 'Add to favorites';
-    fav.textContent = favs.has(s.id) ? '★' : '☆';
+    fav.innerHTML = `<i class="ti ti-${favs.has(s.id) ? 'star-filled' : 'star'}"></i>`;
     fav.onclick = () => toggleFav(s.id);
     tile.appendChild(fav);
 
@@ -495,7 +532,7 @@ function render() {
       const del = document.createElement('button');
       del.className = 'del';
       del.title = 'Remove';
-      del.textContent = '×';
+      del.innerHTML = '<i class="ti ti-x"></i>';
       del.onclick = () => removeCustom(s.id);
       tile.appendChild(del);
     }
@@ -505,13 +542,13 @@ function render() {
   if (!q && (filterCat === 'all' || filterCat === 'yours')) {
     const tile = document.createElement('div');
     tile.className = 'tile add';
-    tile.innerHTML = `<button class="pad"><span class="emoji">➕</span><span class="label">Add your own</span></button>`;
+    tile.innerHTML = `<button class="pad"><i class="icon ti ti-plus"></i><span class="label">Add your own</span></button>`;
     tile.querySelector('button').onclick = () => document.getElementById('fileInput').click();
     grid.appendChild(tile);
   } else if (!shown.length) {
     grid.innerHTML = filterCat === 'favs' && !q
-      ? `<p class="empty">No favorites yet — tap ☆ on any sound to pin it here ⭐</p>`
-      : `<p class="empty">No sounds match 🤷</p>`;
+      ? `<p class="empty">No favorites yet — tap the star on any sound to pin it here</p>`
+      : `<p class="empty">No sounds match</p>`;
   }
 }
 
@@ -596,7 +633,7 @@ document.addEventListener('keydown', e => {
 
 rebuild();
 DB.all().then(rows => {
-  CUSTOM = (rows || []).map(r => ({ ...r, cat: 'yours' }));
+  CUSTOM = (rows || []).map(r => ({ ...r, icon: r.icon || 'music', cat: 'yours' }));
   if (CUSTOM.length) rebuild();
 }).catch(() => {});
 </script>
